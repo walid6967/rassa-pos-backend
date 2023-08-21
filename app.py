@@ -1,4 +1,6 @@
 from flask import Flask
+from flask_cors import CORS
+
 from source.Invoice_details import Invoice
 from source.utilities import utilities
 
@@ -8,6 +10,7 @@ app = Flask(__name__)
 def Invoice_detail():
    return Invoice()
 
+CORS(app)
 
 @app.route("/utilities", methods=['POST', 'PUT', 'GET', 'DELETE'])
 def util():
