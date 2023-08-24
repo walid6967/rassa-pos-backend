@@ -1,6 +1,8 @@
 from flask import request, json
 from database import insert, update, select, delete
 
+def convert_arr_to_map(keys, arr):
+    return [{key: val for key, val in zip(keys, invoices)} for invoices in arr]
 
 def Invoice():
     access_token = request.headers.get('Authorization')
@@ -34,7 +36,7 @@ def Invoice():
         invoice_items_json = json.dumps(invoice_items)
 
         taxes = total_amount * tax_percentage
-        payable_amount = total_amount - taxes
+        payable_amount = total_amount - taxes - discount
 
         result = insert(
             access_token=access_token,
@@ -113,5 +115,9 @@ def Invoice():
             table='invoices',
             cols=['id', 'invoice_num', 'contact', 'date', 'buy', 'remaining', 'total_amount', 'discount', 'taxes','payable_amount','invoice_items'],
         )
-
+        
+        keys = ['id', 'invoice_num', 'contact', 'date', 'buy', 'remaining', 'total_amount', 'discount', 'taxes','payable_amount','invoice_items']
+        result_mapped = convert_arr_to_map(keys, result.get('result', []))
+    
+        return result_mapped 
     return result

@@ -1,5 +1,6 @@
 from flask import request
 from database import insert, update, select, delete
+from source.Invoice_details import convert_arr_to_map
 
 def utilities():
     access_token = request.headers.get('Authorization')
@@ -53,5 +54,9 @@ def utilities():
             table='utilities',
             cols=['id','title', 'key', 'value']
         )
+        keys = ['id', 'title', 'key', 'value']
+        result_mapped = convert_arr_to_map(keys, result.get('result', []))
+    
+        return result_mapped 
 
     return result
