@@ -14,11 +14,12 @@ def home():
 def Invoice_detail():
    return Invoice()
 
-CORS(app)
-
 @app.route("/utilities", methods=['POST', 'PUT', 'GET', 'DELETE'])
 def util():
    return utilities()
+
+CORS(app)
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=9005, host="0.0.0.0")

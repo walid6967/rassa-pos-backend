@@ -110,10 +110,12 @@ def Invoice():
             print(result_items)
 
     else:
+        id = request.args.get('id')
         result = select(
             access_token=access_token,
             table='invoices',
             cols=['id', 'invoice_num', 'contact', 'date', 'buy', 'remaining', 'total_amount', 'discount', 'taxes','payable_amount','invoice_items'],
+            filters=[{'col': 'id', 'op': '=', 'val': id}]
         )
         
         keys = ['id', 'invoice_num', 'contact', 'date', 'buy', 'remaining', 'total_amount', 'discount', 'taxes','payable_amount','invoice_items']
