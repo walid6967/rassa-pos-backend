@@ -1,9 +1,6 @@
 from flask import request, json
 from database import insert, update, select, delete
 
-def convert_arr_to_map(keys, arr):
-    return [{key: val for key, val in zip(keys, invoices)} for invoices in arr]
-
 def Invoice():
     access_token = request.headers.get('Authorization')
     
@@ -110,16 +107,37 @@ def Invoice():
             print(result_items)
 
     else:
-        id = request.args.get('id')
         result = select(
             access_token=access_token,
             table='invoices',
             cols=['id', 'invoice_num', 'contact', 'date', 'buy', 'remaining', 'total_amount', 'discount', 'taxes','payable_amount','invoice_items'],
-            filters=[{'col': 'id', 'op': '=', 'val': id}]
-        )
+            )
         
         keys = ['id', 'invoice_num', 'contact', 'date', 'buy', 'remaining', 'total_amount', 'discount', 'taxes','payable_amount','invoice_items']
         result_mapped = convert_arr_to_map(keys, result.get('result', []))
     
         return result_mapped 
     return result
+
+def get_invoice_by_id():
+    access_token = request.headers.get('Authorization')
+    id = request.args.get('id') 
+    if id:
+        if request.method == 'GET':
+            result = select(
+                access_token=access_token,
+                table='invoices',
+                cols=['id', 'invoice_num', 'contact', 'date', 'buy', 'remaining', 'total_amount', 'discount', 'taxes','payable_amount','invoice_items'],
+                filters=[{'col': 'id', 'op': '=', 'val': id}]
+            )
+
+            if 'result' in result and result['result']:
+                keys = ['id', 'invoice_num', 'contact', 'date', 'buy', 'remaining', 'total_amount', 'discount', 'taxes','payable_amount','invoice_items']
+                result_mapped = convert_arr_to_map(keys, [result['result'][0]])
+                return result_mapped
+
+            return {'error': 'Invoice not found'}, 404
+        
+
+def convert_arr_to_map(keys, arr):
+    return [{key: val for key, val in zip(keys, invoices)} for invoices in arr]

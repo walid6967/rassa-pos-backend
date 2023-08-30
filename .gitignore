@@ -1,0 +1,26 @@
+# Ignore environment-specific files
+env/
+instance/
+
+# Ignore compiled Python files
+__pycache__/
+
+# Ignore local development configuration
+config.py
+
+# Ignore editor and IDE-specific files
+.vscode/
+.idea/
+
+# Ignore logs
+logs/
+
+# Ignore virtual environment
+venv/
+
+# Ignore package dependencies
+/venv/
+/venv/
+
+# Ignore sensitive or secret files
+secret_config.json
