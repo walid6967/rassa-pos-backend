@@ -35,14 +35,7 @@ def Invoice():
         taxes = total_amount * tax_percentage
         payable_amount = total_amount - taxes - discount
 
-        result = insert(
-            access_token=access_token,
-            table='invoices',
-            cols=['invoice_num', 'contact', 'date', 'buy', 'remaining', 'total_amount', 'discount', 'taxes', 'payable_amount','invoice_items'],
-            rows=[[invoice_num, contact, date, buy, remaining, total_amount, discount, taxes, payable_amount, invoice_items_json]]
-        )
-
-        invoice_id = "edf0fbc3-09fb-44bf-a93e-af995ee7505c"
+        invoice_id = " "
         for i in invoice_items:
             result = insert(
                 access_token=access_token,
@@ -50,6 +43,13 @@ def Invoice():
                 cols=['invoice_id', 'title', 'amount', 'price'],
                 rows=[[invoice_id, i['title'], i['amount'], i['price']]]  
             )
+
+        result = insert(
+            access_token=access_token,
+            table='invoices',
+            cols=['invoice_num', 'contact', 'date', 'buy', 'remaining', 'total_amount', 'discount', 'taxes', 'payable_amount','invoice_items'],
+            rows=[[invoice_num, contact, date, buy, remaining, total_amount, discount, taxes, payable_amount, invoice_items_json]]
+        )
 
     elif request.method == 'PUT':
             id = request.args.get('id')
@@ -137,7 +137,7 @@ def get_invoice_by_id():
                 return result_mapped
 
             return {'error': 'Invoice not found'}, 404
-        
+        return result
 
 def convert_arr_to_map(keys, arr):
     return [{key: val for key, val in zip(keys, invoices)} for invoices in arr]
