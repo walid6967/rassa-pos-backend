@@ -20,7 +20,7 @@ def Invoice():
         body = request.json
         if not body:
             return {'error': 'No body provided'}, 400
-        
+        type = body.get('type')
         invoice_num = body.get('invoice_num')
         contact = body.get('contact')
         date = body.get('date')
@@ -32,25 +32,29 @@ def Invoice():
 
         invoice_items_json = json.dumps(invoice_items)
 
-        taxes = total_amount * tax_percentage
-        payable_amount = total_amount - taxes - discount
+        # taxes = total_amount * tax_percentage
+        # payable_amount = total_amount - taxes - discount
 
-        invoice_id = " "
-        for i in invoice_items:
+        item = []
+        for item_id, item in enumerate(invoice_items):
             result = insert(
                 access_token=access_token,
                 table='items',
-                cols=['invoice_id', 'title', 'amount', 'price'],
-                rows=[[invoice_id, i['title'], i['amount'], i['price']]]  
+                cols=['title', 'amount', 'price', 'item_id'],
+                rows=[[item['title'], item['amount'], item['price'], item_id]]  
             )
+        # Include "id" field in each item of the response
+        invoice_items_with_id = [{'id': item_id + 1, **item} for item_id, item in enumerate(invoice_items)]
+
+        # Convert the modified list to JSON
+        invoice_items_json = json.dumps(invoice_items_with_id)
 
         result = insert(
             access_token=access_token,
             table='invoices',
-            cols=['invoice_num', 'contact', 'date', 'buy', 'remaining', 'total_amount', 'discount', 'taxes', 'payable_amount','invoice_items'],
-            rows=[[invoice_num, contact, date, buy, remaining, total_amount, discount, taxes, payable_amount, invoice_items_json]]
+            cols=['type','invoice_num', 'contact', 'date', 'buy', 'remaining', 'total_amount', 'discount', 'taxes', 'payable_amount','invoice_items'],
+            rows=[[type,invoice_num, contact, date, buy, remaining, total_amount, discount, taxes, payable_amount, invoice_items_json]]
         )
-
     elif request.method == 'PUT':
             id = request.args.get('id')
             body = request.json
@@ -70,8 +74,8 @@ def Invoice():
 
             invoice_items_json = json.dumps(invoice_items)
 
-            taxes = total_amount * tax_percentage
-            payable_amount = total_amount - taxes
+            # taxes = total_amount * tax_percentage
+            # payable_amount = total_amount - taxes
 
 
             result = update(
@@ -81,15 +85,17 @@ def Invoice():
                 vals=[invoice_num, contact, date, buy, remaining, total_amount, discount, taxes, payable_amount, invoice_items_json],
                 filters=[{'col': 'id', 'op': '=', 'val': id}]
             )
-            invoice_id = id 
-            for i in invoice_items:
-                result = update(
-                    access_token=access_token,
-                    table='items',
-                    cols=['title', 'amount', 'price'],
-                    vals=[i['title'], i['amount'], i['price']],
-                    filters=[{'col': 'invoice_id', 'op': '=', 'val': invoice_id}]
-        )
+            for item in body.get('invoice_items', []):
+                item_id = item.get('id')
+                if item_id:
+                    result = update(
+                        access_token=access_token,
+                        table='items',
+                        cols=['title', 'amount', 'price'],
+                        vals=[item['title'], item['amount'], item['price']],
+                        filters=[{'col': 'id', 'op': '=', 'val': item_id}]
+                    )
+
                 
     elif request.method == 'DELETE':
         id = request.args.get('id')
